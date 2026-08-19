@@ -1,4 +1,4 @@
-import { Check, Trash } from "lucide-react";
+import { Check, Pencil, Trash } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
 
 export default function App() {
@@ -59,15 +59,21 @@ export default function App() {
       </form>
 
       {tasks.map((task, index) => (
-        <ul key={index} className="pt-4 pl-4 flex flex-row justify-between">
-          <li className="list-disc">{task}</li>
+        <ul key={index} className="pt-4 flex flex-row justify-between">
+          <li>- {task}</li>
 
-          <button
-            className="bg-rose-400 hover:bg-rose-500 transition-colors px-2.5 py-1 rounded text-rose-50"
-            onClick={() => excluirTask(task)}
-          >
-            <Trash size={20} />
-          </button>
+          <div className="flex flex-col">
+            <button
+              className="bg-rose-400 hover:bg-rose-500 transition-colors px-2.5 py-1 rounded text-rose-50"
+              onClick={() => excluirTask(task)}
+            >
+              <Trash size={20} />
+            </button>
+
+            <button className="bg-lime-400 hover:bg-lime-500 transition-colors px-2.5 py-1 rounded text-lime-50">
+              <Pencil size={20} />
+            </button>
+          </div>
         </ul>
       ))}
     </div>
