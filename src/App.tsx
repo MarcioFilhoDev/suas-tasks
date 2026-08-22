@@ -1,10 +1,7 @@
-import { Check, Pencil, Trash } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
-
-interface TaskProps {
-  id: number;
-  task: string;
-}
+import type { TaskProps } from "./types/Task";
+import Task from "./components/Task";
 
 export default function App() {
   const [editTask, setEditTask] = useState<TaskProps | null>(null);
@@ -14,6 +11,12 @@ export default function App() {
     const response = localStorage.getItem("@tasks");
 
     if (response) {
+      const tasks: TaskProps[] = JSON.parse(response);
+
+      tasks.map((task) =>
+        task.id >= nextId ? setNextId(task.id + 1) : nextId,
+      );
+
       return JSON.parse(response);
     }
 
@@ -87,33 +90,17 @@ export default function App() {
         </form>
 
         {tasks.length > 0 ? (
-          <div className="bg-white p-4 mt-4 rounded">
+          <div className="bg-white flex flex-col gap-2 p-4 mt-4 rounded">
             {tasks.map((task) => (
-              <ul
+              <Task
                 key={task.id}
-                className="bg-gray-200 rounded border border-gray-400 px-4 py-2 flex flex-row justify-between"
-              >
-                <li>{task.task}</li>
-
-                <div className="flex  gap-2">
-                  <button
-                    className="bg-rose-400 hover:bg-rose-500 transition-colors px-2.5 py-1 rounded text-rose-50"
-                    onClick={() => excluirTask(task)}
-                  >
-                    <Trash size={20} />
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setInput(task.task);
-                      setEditTask(task);
-                    }}
-                    className="bg-lime-400 hover:bg-lime-500 transition-colors px-2.5 py-1 rounded text-lime-50"
-                  >
-                    <Pencil size={20} />
-                  </button>
-                </div>
-              </ul>
+                task={task}
+                excluirTask={excluirTask}
+                editTask={() => {
+                  setInput(task.task);
+                  setEditTask(task);
+                }}
+              />
             ))}
           </div>
         ) : (
