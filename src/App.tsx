@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
 import type { TaskProps } from "./types/Task";
 import Task from "./components/Task";
@@ -77,7 +77,7 @@ export default function App() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1 bg-gray-200 rounded pl-2 py-1 text-base"
+            className="flex-1 bg-white rounded pl-2 py-2 text-base"
             type="text"
             placeholder="digite alguma coisa..."
           />
@@ -85,12 +85,12 @@ export default function App() {
             type="submit"
             className="bg-blue-400 hover:bg-blue-500 transition-colors px-2.5 rounded text-blue-50"
           >
-            <Check size={20} />
+            <Plus size={20} />
           </button>
         </form>
 
         {tasks.length > 0 ? (
-          <div className="bg-white flex flex-col gap-2 p-4 mt-4 rounded">
+          <div className="bg-white max-h-140 flex flex-col gap-2 p-4 mt-4 rounded overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {tasks.map((task) => (
               <Task
                 key={task.id}
