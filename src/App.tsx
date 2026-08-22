@@ -1,10 +1,16 @@
 import { Check, Pencil, Trash } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
 
+interface TaskProps {
+  id: number;
+  task: string;
+}
+
 export default function App() {
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [task, setTask] = useState("");
-  const [tasks, setTasks] = useState<string[]>(() => {
+  const [editTask, setEditTask] = useState<TaskProps | null>(null);
+  const [nextId, setNextId] = useState<number>(1);
+  const [input, setInput] = useState("");
+  const [tasks, setTasks] = useState<TaskProps[]>(() => {
     const response = localStorage.getItem("@tasks");
 
     if (response) {
@@ -18,32 +24,40 @@ export default function App() {
     localStorage.setItem("@tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  useEffect(() => {
-    localStorage.setItem("@tasks", JSON.stringify(tasks));
-  }, [tasks]);
+  function handleEditTask(e: SubmitEvent, task: TaskProps) {
+    e.preventDefault();
+
+    const data = {
+      id: task.id,
+      task: input,
+    };
+
+    setTasks((prev) => prev.map((task) => (task.id === data.id ? data : task)));
+    setEditTask(null);
+    setInput("");
+  }
 
   function handleSaveTask(e: SubmitEvent) {
     e.preventDefault();
+    setNextId(nextId + 1);
 
-    if (editingIndex !== null) {
-      setTasks((prev) =>
-        prev.map((item, index) => (index === editingIndex ? task : item)),
-      );
+    if (input !== "") {
+      const data = {
+        //  "id" deve ser o próximo number do maior "id" de task registrada
+        id: nextId,
+        task: input,
+      };
 
-      setTask("");
-      setEditingIndex(null);
-      return;
-    }
-
-    if (task !== "") {
-      setTasks((prev) => [...prev, task]);
-      setTask("");
+      setTasks((prev) => [...prev, data]);
+      setInput("");
     }
   }
 
-  function excluirTask(task: string) {
-    const novaTask = tasks.filter((item) => item !== task);
-    setTasks(novaTask);
+  function excluirTask(task: TaskProps) {
+    //  Filtrando pelos itens em que "task" é diferente do que é passado
+    const newListTasks = tasks.filter((item) => item.id !== task.id);
+
+    setTasks(newListTasks);
   }
 
   return (
@@ -52,12 +66,14 @@ export default function App() {
         <h1 className="text-2xl text-white font-semibold">Suas Tarefas</h1>
 
         <form
-          onSubmit={(e) => handleSaveTask(e)}
+          onSubmit={(e) =>
+            editTask ? handleEditTask(e, editTask) : handleSaveTask(e)
+          }
           className="flex flex-1 gap-4 mt-4"
         >
           <input
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             className="flex-1 bg-gray-200 rounded pl-2 py-1 text-base"
             type="text"
             placeholder="digite alguma coisa..."
@@ -72,12 +88,12 @@ export default function App() {
 
         {tasks.length > 0 ? (
           <div className="bg-white p-4 mt-4 rounded">
-            {tasks.map((task, index) => (
+            {tasks.map((task) => (
               <ul
-                key={index}
+                key={task.id}
                 className="bg-gray-200 rounded border border-gray-400 px-4 py-2 flex flex-row justify-between"
               >
-                <li>{task}</li>
+                <li>{task.task}</li>
 
                 <div className="flex  gap-2">
                   <button
@@ -89,8 +105,8 @@ export default function App() {
 
                   <button
                     onClick={() => {
-                      setTask(task);
-                      setEditingIndex(index);
+                      setInput(task.task);
+                      setEditTask(task);
                     }}
                     className="bg-lime-400 hover:bg-lime-500 transition-colors px-2.5 py-1 rounded text-lime-50"
                   >
