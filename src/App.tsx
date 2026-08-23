@@ -1,7 +1,11 @@
-import { Plus } from "lucide-react";
 import { useEffect, useState, type SubmitEvent } from "react";
 import type { TaskProps } from "./types/Task";
+
 import Task from "./components/Task";
+
+import { Plus } from "lucide-react";
+
+import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
 
 export default function App() {
   const [editTask, setEditTask] = useState<TaskProps | null>(null);
@@ -63,6 +67,26 @@ export default function App() {
     setTasks(newListTasks);
   }
 
+  function reorder(tasks: TaskProps[], startIndex: number, endIndex: number) {
+    const result = Array.from(tasks);
+    const [removed] = result.splice(startIndex, 1); //  removendo 1 item na posição inicial
+    result.splice(endIndex, 0, removed);
+    //  não remove nenhum item e, solta o item removido anteriomente para a posição que foi solto
+
+    return result; //  result é a lista reordenada
+  }
+
+  function onDragEnd(result: DropResult) {
+    //  A lib pede que verifique se soltou o "objeto"/linha na área correta
+    if (!result.destination) {
+      return;
+    }
+
+    const item = reorder(tasks, result.source.index, result.destination.index);
+
+    setTasks(item);
+  }
+
   return (
     <div className="p-4 flex items-center justify-center mt-[10%]">
       <div className="w-xl">
@@ -91,17 +115,32 @@ export default function App() {
 
         {tasks.length > 0 ? (
           <div className="bg-white max-h-140 flex flex-col gap-2 p-4 mt-4 rounded overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {tasks.map((task) => (
-              <Task
-                key={task.id}
-                task={task}
-                excluirTask={excluirTask}
-                editTask={() => {
-                  setInput(task.task);
-                  setEditTask(task);
-                }}
-              />
-            ))}
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="tasks" type="list" direction="vertical">
+                {(provided) => (
+                  <article
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="flex flex-col gap-2"
+                  >
+                    {tasks.map((task, index) => (
+                      <Task
+                        index={index}
+                        key={task.id}
+                        task={task}
+                        excluirTask={excluirTask}
+                        editTask={() => {
+                          setInput(task.task);
+                          setEditTask(task);
+                        }}
+                      />
+                    ))}
+
+                    {provided.placeholder}
+                  </article>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         ) : (
           <div>
