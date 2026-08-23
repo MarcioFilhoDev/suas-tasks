@@ -25,7 +25,7 @@ export default function Task(props: TasksProps) {
             <Menu size={20} color="#252525" />
 
             <span className="line-clamp-2 text-ellipsis">
-              {props.task.id} - {props.task.task}
+              {props.task.task}
             </span>
           </div>
 
