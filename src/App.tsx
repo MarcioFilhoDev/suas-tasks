@@ -7,24 +7,38 @@ import { Plus } from "lucide-react";
 
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
 
+function nextTaskId(tasks: TaskProps[]) {
+  return tasks.reduce((max, task) => Math.max(max, task.id), 0) + 1;
+}
+
+function withUniqueIds(tasks: TaskProps[]) {
+  const seen = new Set<number>();
+  let nextId = nextTaskId(tasks);
+
+  return tasks.map((task) => {
+    if (!seen.has(task.id)) {
+      seen.add(task.id);
+      return task;
+    }
+
+    const uniqueTask = { ...task, id: nextId };
+    seen.add(nextId);
+    nextId += 1;
+    return uniqueTask;
+  });
+}
+
 export default function App() {
   const [editTask, setEditTask] = useState<TaskProps | null>(null);
-  const [nextId, setNextId] = useState<number>(1);
   const [input, setInput] = useState("");
   const [tasks, setTasks] = useState<TaskProps[]>(() => {
     const response = localStorage.getItem("@tasks");
 
-    if (response) {
-      const tasks: TaskProps[] = JSON.parse(response);
-
-      tasks.map((task) =>
-        task.id >= nextId ? setNextId(task.id + 1) : nextId,
-      );
-
-      return JSON.parse(response);
+    if (!response) {
+      return [];
     }
 
-    return [];
+    return withUniqueIds(JSON.parse(response));
   });
 
   useEffect(() => {
@@ -46,18 +60,13 @@ export default function App() {
 
   function handleSaveTask(e: SubmitEvent) {
     e.preventDefault();
-    setNextId(nextId + 1);
 
-    if (input !== "") {
-      const data = {
-        //  "id" deve ser o próximo number do maior "id" de task registrada
-        id: nextId,
-        task: input,
-      };
-
-      setTasks((prev) => [...prev, data]);
-      setInput("");
+    if (input === "") {
+      return;
     }
+
+    setTasks((prev) => [...prev, { id: nextTaskId(prev), task: input }]);
+    setInput("");
   }
 
   function excluirTask(task: TaskProps) {
@@ -77,14 +86,18 @@ export default function App() {
   }
 
   function onDragEnd(result: DropResult) {
+    const { source, destination } = result;
+
     //  A lib pede que verifique se soltou o "objeto"/linha na área correta
-    if (!result.destination) {
+    if (!destination) {
       return;
     }
 
-    const item = reorder(tasks, result.source.index, result.destination.index);
+    if (source.index === destination.index) {
+      return;
+    }
 
-    setTasks(item);
+    setTasks((prev) => reorder(prev, source.index, destination.index));
   }
 
   return (
