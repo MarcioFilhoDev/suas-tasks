@@ -1,4 +1,26 @@
-# React + TypeScript + Vite
+# Suas Tasks
+
+## Configuração do Firebase
+
+O app precisa das variáveis abaixo para inicializar o Firebase.
+
+### Desenvolvimento local
+
+Copie `.env.example` para `.env.local` e preencha os valores da configuração do app Web no Firebase Console:
+
+```sh
+cp .env.example .env.local
+```
+
+O arquivo `.env.local` é ignorado pelo Git. Não adicione valores reais ao `.env.example`.
+
+### Deploy na Vercel
+
+No projeto da Vercel, abra **Settings > Environment Variables** e cadastre cada variável listada no `.env.example`, com o respectivo valor da configuração do app Web do Firebase. Selecione os ambientes em que o app será publicado e faça um novo deploy após salvar.
+
+As variáveis com prefixo `VITE_` são incorporadas ao JavaScript enviado ao navegador; elas não são um cofre para segredos privados. Proteja os dados com Firebase Security Rules e não use credenciais de Firebase Admin no frontend.
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
