@@ -1,4 +1,12 @@
 export type TaskProps = {
-  id: number;
-  task: string;
+  id: string;
+  completed: boolean;
+  created: Date;
+  updated: Date;
+  description: string;
+};
+
+export type UserData = {
+  uid: string;
+  email: string;
 };
