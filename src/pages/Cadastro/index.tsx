@@ -1,35 +1,36 @@
 import { useState, type SubmitEvent } from "react";
 
-import { auth } from "../../services/firebaseConnection";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { toast } from "react-toastify";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ArrowRight, CheckCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import Input from "../../components/Input";
+import { auth } from "../../services/firebaseConnection";
 
-export default function Login() {
+export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
-
+  const [confirmPass, setConfirmPass] = useState("");
   const nav = useNavigate();
 
-  async function handleSignIn(e: SubmitEvent) {
+  async function handleSignUp(e: SubmitEvent) {
     e.preventDefault();
 
-    if (!email || !pass) {
-      toast.warn("Preencha todos os campos.");
+    if (pass !== confirmPass) {
+      toast.warn("As senhas não conferem.");
       return;
     }
 
-    await signInWithEmailAndPassword(auth, email, pass)
-      .then(() => {
-        toast.success("Usuário autenticado com sucesso.");
-        nav("/tasks", { replace: true });
-      })
-      .catch((error) => {
-        toast.error("Erro ao fazer o login.");
-        console.log(error);
-      });
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass);
+      toast.success("Conta criada com sucesso.");
+      nav("/tasks", { replace: true });
+    } catch (error) {
+      toast.error(
+        "Erro ao criar sua conta. Verifique os dados e tente novamente.",
+      );
+      console.error(error);
+    }
   }
 
   return (
@@ -47,35 +48,32 @@ export default function Login() {
 
           <div className="mt-12 max-w-sm md:mt-0">
             <p className="mb-3 text-xs font-bold tracking-[0.16em] text-[#b9d2c7]">
-              ORGANIZAÇÃO PESSOAL
+              SUA ROTINA, NO SEU RITMO
             </p>
             <h1 className="text-4xl leading-[1.12] font-bold sm:text-5xl">
-              Um passo de cada vez.
+              Comece por aqui.
             </h1>
             <div className="mt-7 h-1 w-14 rounded-full bg-[#e9765d]" />
           </div>
 
           <p className="mt-10 text-sm text-[#c1d1ca]">
-            Entre e continue de onde parou.
+            Crie sua conta e organize suas tarefas.
           </p>
         </div>
 
         <div className="flex items-center justify-center px-6 py-10 sm:px-12 md:px-16">
           <div className="w-full max-w-md">
             <p className="mb-2 text-xs font-bold tracking-[0.16em] text-[#668078]">
-              BEM-VINDO DE VOLTA
+              NOVA CONTA
             </p>
             <h2 className="text-3xl font-bold tracking-normal text-[#1c302b]">
-              Acesse sua conta
+              Crie sua conta
             </h2>
             <p className="mt-2 mb-8 text-sm text-[#75817b]">
-              Informe seus dados para entrar.
+              Preencha os dados para começar.
             </p>
 
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={(e) => handleSignIn(e)}
-            >
+            <form className="flex flex-col gap-5" onSubmit={handleSignUp}>
               <Input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -91,8 +89,20 @@ export default function Login() {
                 onChange={(e) => setPass(e.target.value)}
                 title="Senha"
                 type="password"
-                autoComplete="current-password"
-                placeholder="Sua senha"
+                autoComplete="new-password"
+                placeholder="Mínimo de 6 caracteres"
+                minLength={6}
+                required
+              />
+
+              <Input
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                title="Confirme sua senha"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Digite a senha novamente"
+                minLength={6}
                 required
               />
 
@@ -100,18 +110,18 @@ export default function Login() {
                 type="submit"
                 className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#e9765d] px-4 font-semibold text-white transition-colors hover:bg-[#d9674f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9765d]"
               >
-                Acessar
+                Criar conta
                 <ArrowRight size={18} aria-hidden="true" />
               </button>
             </form>
 
             <p className="mt-6 text-center text-sm text-[#75817b]">
-              Ainda não tem uma conta?{" "}
+              Já tem uma conta?{" "}
               <Link
-                to="/cadastro"
+                to="/"
                 className="font-semibold text-[#20443b] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#668078]"
               >
-                Cadastre-se
+                Fazer login
               </Link>
             </p>
           </div>
